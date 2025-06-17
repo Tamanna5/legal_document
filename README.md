@@ -21,7 +21,7 @@ This project implements an AI-driven system for analyzing and summarizing legal 
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Tamanna5/legal_document.git
 cd legal_document
 ```
 
