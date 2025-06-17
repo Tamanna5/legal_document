@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Document Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --border-color: #dee2e6;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .upload-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--secondary-color);
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area.dragover {
+            background-color: #e3f2fd;
+            border-color: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .upload-area p {
+            color: #666;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+        }
+
+        .upload-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .supported-formats {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .error {
+            background-color: #fee2e2;
+            color: var(--accent-color);
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+            text-align: center;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h3::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background-color: var(--secondary-color);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 1rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .section li::before {
+            content: '•';
+            color: var(--secondary-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .download-btn {
+            background-color: var(--success-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .download-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .download-options {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .download-options button {
+            margin-right: 1rem;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Legal Document Analyzer</h1>
+            <p>Upload your legal document for automated analysis and summarization</p>
+        </div>
+        
+        <div class="upload-container">
+            <div class="upload-area" id="dropZone">
+                <div class="upload-icon">📄</div>
+                <p>Drag and drop your legal document here</p>
+                <p>or</p>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,.docx,.txt">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose File
+                </button>
+                <p class="supported-formats">Supported formats: PDF, DOCX, TXT</p>
+            </div>
+
+            <div class="file-preview" id="filePreview">
+                <div class="file-info">
+                    <div>
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-size" id="fileSize"></div>
+                    </div>
+                    <div class="download-options" id="downloadOptions">
+                        <button class="download-btn" onclick="downloadPDF()">
+                            Download PDF Summary
+                        </button>
+                        <button class="download-btn" onclick="downloadJSON()">
+                            Download JSON Summary
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Analyzing document...</p>
+        </div>
+
+        <div class="results" id="results">
+            <h2>Analysis Results</h2>
+            
+            <div class="section">
+                <h3>Document Summary</h3>
+                <div id="documentSummary"></div>
+            </div>
+
+            <div class="section">
+                <h3>Key Legal Parties</h3>
+                <div id="legalParties"></div>
+            </div>
+
+            <div class="section">
+                <h3>Key Legal Entities</h3>
+                <div id="legalEntities"></div>
+            </div>
+
+            <div class="section">
+                <h3>Key Clauses</h3>
+                <div id="keyClauses"></div>
+            </div>
+
+            <div class="section">
+                <h3>Obligations and Rights</h3>
+                <div id="obligationsRights"></div>
+            </div>
+
+            <div class="section">
+                <h3>Section Summaries</h3>
+                <div id="sectionSummaries"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const downloadOptions = document.getElementById('downloadOptions');
+
+        let currentFile = null;
+        let summaryPath = null;
+        let pdfPath = null;
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (isValidFileType(file)) {
+                    currentFile = file;
+                    showFilePreview(file);
+                    uploadFile(file);
+                } else {
+                    showError('Invalid file type. Please upload a PDF, DOCX, or TXT file.');
+                }
+            }
+        }
+
+        function isValidFileType(file) {
+            const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+            return validTypes.includes(file.type);
+        }
+
+        function showFilePreview(file) {
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            filePreview.style.display = 'block';
+            dropZone.style.display = 'none';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading();
+            hideError();
+            hideSuccess();
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    summaryPath = data.summary_path;
+                    pdfPath = data.pdf_path;
+                    showSuccess('Document analyzed successfully!');
+                    displayResults(data);
+                    downloadOptions.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('An error occurred while processing the file.');
+                console.error('Error:', error);
+            });
+        }
+
+        function downloadPDF() {
+            if (pdfPath) {
+                const filename = pdfPath.split('/').pop();
+                window.location.href = `/download/${filename}`;
+            }
+        }
+
+        function downloadJSON() {
+            if (summaryPath) {
+                const filename = summaryPath.split('/').pop();
+                window.location.href = `/download/${filename}`;
+            }
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function hideSuccess() {
+            successMessage.style.display = 'none';
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+            results.style.display = 'none';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function displayResults(data) {
+            results.style.display = 'block';
+            
+            // Display document summary
+            document.getElementById('documentSummary').textContent = data.document_summary;
+
+            // Display legal parties
+            const partiesHtml = Object.entries(data.legal_roles)
+                .map(([role, party]) => `<p><strong>${role}:</strong> ${party}</p>`)
+                .join('');
+            document.getElementById('legalParties').innerHTML = partiesHtml;
+
+            // Display legal entities
+            const entitiesHtml = Object.entries(data.entities)
+                .filter(([_, entities]) => entities.length > 0)
+                .map(([type, entities]) => `
+                    <div>
+                        <strong>${type}:</strong>
+                        <ul>
+                            ${entities.slice(0, 5).map(entity => `<li>${entity}</li>`).join('')}
+                            ${entities.length > 5 ? `<li>... and ${entities.length - 5} more</li>` : ''}
+                        </ul>
+                    </div>
+                `).join('');
+            document.getElementById('legalEntities').innerHTML = entitiesHtml;
+
+            // Display key clauses
+            const clausesHtml = Object.entries(data.key_clauses)
+                .map(([type, clauses]) => `
+                    <div>
+                        <strong>${type.replace('_', ' ').toUpperCase()}:</strong>
+                        <ul>
+                            ${clauses.slice(0, 2).map(clause => `<li>${clause.length > 200 ? clause.substring(0, 200) + '...' : clause}</li>`).join('')}
+                            ${clauses.length > 2 ? `<li>... and ${clauses.length - 2} more instances</li>` : ''}
+                        </ul>
+                    </div>
+                `).join('');
+            document.getElementById('keyClauses').innerHTML = clausesHtml;
+
+            // Display obligations and rights
+            const obligationsHtml = data.obligations_and_rights.obligations
+                .slice(0, 5)
+                .map(obligation => `<li>${obligation.text}</li>`)
+                .join('');
+            const rightsHtml = data.obligations_and_rights.rights
+                .slice(0, 5)
+                .map(right => `<li>${right.text}</li>`)
+                .join('');
+            document.getElementById('obligationsRights').innerHTML = `
+                <div>
+                    <strong>Obligations:</strong>
+                    <ul>${obligationsHtml}</ul>
+                    ${data.obligations_and_rights.obligations.length > 5 ? 
+                        `<p>... and ${data.obligations_and_rights.obligations.length - 5} more obligations</p>` : ''}
+                </div>
+                <div>
+                    <strong>Rights:</strong>
+                    <ul>${rightsHtml}</ul>
+                    ${data.obligations_and_rights.rights.length > 5 ? 
+                        `<p>... and ${data.obligations_and_rights.rights.length - 5} more rights</p>` : ''}
+                </div>
+            `;
+
+            // Display section summaries
+            const summariesHtml = data.section_summaries
+                .map(section => `
+                    <div>
+                        <strong>${section.heading}:</strong>
+                        <p>${section.summary}</p>
+                    </div>
+                `).join('');
+            document.getElementById('sectionSummaries').innerHTML = summariesHtml;
+        }
+    </script>
+</body>
+</html> 
