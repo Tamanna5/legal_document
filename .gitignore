@@ -1,1 +1,11 @@
+# Ignore virtual environment
 legal_nlp_env/
+
+# Ignore legal document directories
+Rent/
+Testamentary Matter/
+Partnership/
+Trust Agreements/
+Income Tax/
+Family Law/
+Contract Law/
